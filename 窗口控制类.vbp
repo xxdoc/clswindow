@@ -1,6 +1,5 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
-Reference=*\G{1B45A1FF-B7A8-4D8D-9221-427693E491B2}#1.0#0#C:\Windows\VB6IDEMouseWheelAddin.dll#Sample AddIn Project
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWow64\stdole2.tlb#OLE Automation
 Form=frmMain.frm
 Module=modWindow; modWindow.bas
 Class=clsWindow; clsWindow.cls
@@ -15,7 +14,7 @@ HelpContextID="0"
 CompatibleMode="0"
 MajorVer=2
 MinorVer=2
-RevisionVer=100
+RevisionVer=108
 AutoIncrementVer=1
 ServerSupportFiles=0
 VersionCompanyName="Symental Studio"

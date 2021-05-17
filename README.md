@@ -10,9 +10,6 @@ clsWindow是VB6环境下使用的一个操作外部程序窗口的类，比如�
 
 这个类现在还在一直不断地扩充，功能已经很强大很广泛，使用它可以轻而易举地设置窗口标题栏文字，移动窗体等等。以前要实现这些操作常常需要一大堆api函数，现在只需要一点点代码就可以了，完全让您脱身于api函数的海洋。当然您如果想知道里面的方法实现原理的话可以看一看源代码。
 
-#### 备注：这个框架已经单身8年了，主要组成为一个bas模块和一个类模块，很多人好奇为什么会多出一个bas模块，都弄到一个cls类模块里不行吗？我也想过，主要是里面有个回调得放到模块里面，如果有谁能够做到将这bas模块消灭，合并到一个类模块中请贡献代码，到时更新注释中可以写上你的大名哦。开源框架的建设，需要你我每一个人的添砖加瓦！(*^▽^*) 测试模块下载: https://pan.baidu.com/s/1ZYMFQJ3fHXZiH75KM-JjSw 提取码: 5fc3
-
-
 
 ## 使用范例：
 ### 1）关闭腾讯新闻窗口“腾讯网迷你版”。
@@ -58,8 +55,8 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '          window.GetWindowByTitle("计算器").closeWindow
 '编    程：sysdzw 原创开发，如果有需要对模块扩充或更新的话请邮箱发我一份，共同维护
 '发布日期：2013/06/01
-'博    客：http://blog.163.com/sysdzw
-'          http://blog.csdn.net/sysdzw
+'博    客：https://blog.csdn.net/sysdzw
+'用户手册：https://www.kancloud.cn/sysdzw/clswindow/
 'Email   ：sysdzw@163.com
 'QQ      ：171977759
 '版    本：V1.0 初版                                                           2012/12/03
@@ -107,7 +104,7 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：GetWindowByCursorPos 根据当前光标获取窗口（控件）
 '               增加函数：GetWindowByPoint 根据指定的位置获取窗口（控件）
 '               升级ClickPoint函数，支持点击前后分别延时，默认延时为0            2018/07/23
-'          V2.2 根据网友小凡的bug反馈（句柄和id负数的情况），所以修正了相关正则   2020/01/08
+'          V2.2 修正正则：网友小凡反应了句柄和id存在负数的情况                   2020/01/08
 '               优化属性：Caption(Get)，根据网友小凡的建议改成可获得文本框内容
 '               增加方法：Wait 此方法原为clsWaitableTimer模块中，现集成进来      2020/01/09
 '               增加方法：ClickCurrentPoint 点击当前点                          2020/01/10
@@ -125,8 +122,25 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：MakeTransparent 设置窗口透明度                        2020/02/18
 '               增加函数：MoveToCenter 移动窗口到屏幕中心
 '               增加函数：IsTopmost 判断窗口是否为置顶                          2020/02/20
+'               增加函数：GetWindowTextByHwnd 获得窗口标题，给窗口句柄专用       2020/02/28
+'               修正函数：Focus 旧方法使用后会改变置顶窗口属性                   2020/03/02
+'               增加函数：IsWin64 网友小凡提供                                  2020/03/12
+'               修正函数：AppPath 网友小凡提供兼容64位系统的方法
+'               修正函数：AppCommandLine 网友小凡做了兼容64位处理及其他代码优化  2020/03/15
+'               增加函数：IsForegroundWindow 判断窗口是否为活动窗口             2020/03/17
+'               增加函数：GetClassNameByHwnd 根据句柄得到类名
+'               增加属性：ClassName(Get) 返回窗口的类名
+'               更新函数：CheckWindow 返回值由Long改成Boolean了，并且设为Public
+'               增加函数：Click 点击当前句柄或者指定句柄                        2020/06/29
 '==============================================================================================
 ```
 
 
-！[image](https://img-blog.csdn.net/20180423135213794)
+![](https://img-blog.csdn.net/20180423135213794)
+
+
+**应用案例（均附源码）：**
+
+微便签：https://github.com/sysdzw/WeNote
+
+窗口置顶小插件：https://github.com/sysdzw/SetWindowTop
