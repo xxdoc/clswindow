@@ -103,6 +103,7 @@ Attribute VB_Exposed = False
 '               增加函数：Paste 粘贴内容，可以是字符串或文件
 '               修正函数：GetWindowByClassNameEx 修复了do里面取类名的错误        2022/08/26
 '               增加函数：GetWindowClassNameByHwnd  同GetClassNameByHwnd
+'               增加函数：ClickPointBackground 后台点击某窗口中的某个坐标        2022/09/07
 '==============================================================================================
 Option Explicit
 
@@ -135,6 +136,7 @@ Private Const GWL_ID = (-12)
 Private Const GWL_STYLE = (-16)
 Private Const WM_SYSCOMMAND = &H112
 Private Const WM_SETFOCUS = &H7
+Private Const WM_MOUSEMOVE = &H200
 Private Const WM_LBUTTONDOWN = &H201
 Private Const WM_LBUTTONUP = &H202
 Private Const WM_CLOSE = &H10
@@ -225,8 +227,8 @@ Public Enum enumShift
 End Enum
 
 Public Enum enumPositionMode
-    ABSOLUTE
-    RELATIVE
+    absolute
+    relative
 End Enum
 '过滤窗口是否可见
 Public Enum enumWindowVisible
@@ -1274,19 +1276,7 @@ Public Function SetElementTextByText(ByVal strText$, ByVal strNewText$, Optional
         SetElementTextByText = False
     End If
 End Function
-'点击指定句柄
-Public Function Click(Optional ByVal hWnd1&) As Long
-    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
-    
-    If DebugMe Then
-        writeToFile "DEBUG.txt", Now & " 函数 Click 被调用" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
-    End If
-    
-'    Click = PostMessage(hWnd1, BM_CLICK, 0&, ByVal 0)
-    PostMessage hWnd1, WM_LBUTTONDOWN, 0, ByVal (1 + 1 * 65536)
-    PostMessage hWnd1, WM_LBUTTONUP, 0, ByVal (1 + 1 * 65536)
 
-End Function
 '根据控件的类名点击控件
 Public Function ClickElementByClassName(ByVal strClassName$, Optional ByVal intIndex = 1, Optional ByVal UseRegExp = False) As Long
     If DebugMe Then
@@ -1396,16 +1386,29 @@ Public Function CloseApp(Optional ByVal hWnd1&) As Long
         writeToFile "DEBUG.txt", Now & " 函数CloseApp执行完毕" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
     End If
 End Function
+'点击指定句柄
+Public Function Click(Optional ByVal hWnd1&) As Long
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+    
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 Click 被调用" & vbCrLf & "关闭窗口，句柄为=" & hWnd1, False
+    End If
+    
+'    Click = PostMessage(hWnd1, BM_CLICK, 0&, ByVal 0)
+    PostMessage hWnd1, WM_LBUTTONDOWN, 0, ByVal (1 + 1 * 65536)
+    PostMessage hWnd1, WM_LBUTTONUP, 0, ByVal (1 + 1 * 65536)
+
+End Function
 '点击具体的某个点
-Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = RELATIVE, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enumPositionMode = relative, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 ClickPoint 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = ABSOLUTE Then
+    If PositionMod = absolute Then
         SetCursorPos x1, y1
-    ElseIf PositionMod = RELATIVE Then
-        SetCursorPos Left + x1, Top + y1
+    ElseIf PositionMod = relative Then
+        SetCursorPos Left + x1, Top + y1 '1034 1129
     Else
         MsgBox "函数ClickPoint执行一次。未能识别点击模式" & PositionMod & "，要么是relative(相对位置)要么是absolute(绝对位置)，默认是相对位置。", vbExclamation
         Exit Sub
@@ -1414,6 +1417,22 @@ Public Sub ClickPoint(x1 As Long, y1 As Long, Optional ByVal PositionMod As enum
         Wait delayMilliSecondsBefore
         mouse_event MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0
         mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
+        Wait delayMilliSecondsAfter
+        clickTimes = clickTimes - 1
+    Loop
+End Sub
+'后台点击某个点。注意这个点只能是相对于指定句柄窗口的位置。如果要点击屏幕上任意一点只能通过ClickPoint来点击了
+Public Sub ClickPointBackground(x1 As Long, y1 As Long, Optional ByVal hWnd1&, Optional ByVal clickTimes As Integer = 1, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+    If DebugMe Then
+        writeToFile "DEBUG.txt", Now & " 函数 ClickPointBackground 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " hWnd1=" & hWnd1 & vbTab & " clickTimes=" & clickTimes & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
+    End If
+    
+    If hWnd1 = 0 Then hWnd1 = hWnd_ '如果没写则表示处理当前存储的句柄
+
+    Do While clickTimes > 0
+        Wait delayMilliSecondsBefore
+        PostMessage hWnd1, WM_LBUTTONDOWN, 1, ByVal x1 + y1 * 65536
+        PostMessage hWnd1, WM_LBUTTONUP, 0, ByVal x1 + y1 * 65536
         Wait delayMilliSecondsAfter
         clickTimes = clickTimes - 1
     Loop
@@ -1428,16 +1447,16 @@ Public Sub ClickCurrentPoint()
     mouse_event MOUSEEVENTF_LEFTUP, 0, 0, 0, 0
 End Sub
 '移动鼠标到指定点
-Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     If DebugMe Then
         writeToFile "DEBUG.txt", Now & " 函数 SetCursor 被调用。参数为 x1=" & x1 & vbTab & " y1=" & y1 & vbTab & " PositionMod=" & PositionMod & vbTab & " delayMilliSecondsBefore=" & delayMilliSecondsBefore & vbTab & " delayMilliSecondsAfter=" & delayMilliSecondsAfter, False
     End If
     
-    If PositionMod = ABSOLUTE Then
+    If PositionMod = absolute Then
         Wait delayMilliSecondsBefore
         SetCursorPos x1, y1
         Wait delayMilliSecondsAfter
-    ElseIf PositionMod = RELATIVE Then
+    ElseIf PositionMod = relative Then
         Wait delayMilliSecondsBefore
         SetCursorPos Left + x1, Top + y1
         Wait delayMilliSecondsAfter
@@ -1447,15 +1466,15 @@ Public Sub SetCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal Position
     End If
 End Sub
 '同SetCursor
-Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub SetPoint(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursor(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '同SetCursor
-Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = ABSOLUTE, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
+Public Sub MoveCursorTo(ByVal x1 As Long, ByVal y1 As Long, Optional ByVal PositionMod As enumPositionMode = absolute, Optional ByVal delayMilliSecondsBefore As Long = 0, Optional ByVal delayMilliSecondsAfter As Long = 0)
     SetCursor x1, y1, PositionMod, delayMilliSecondsBefore, delayMilliSecondsAfter
 End Sub
 '直接获得当前鼠标下的窗口或控件的句柄
@@ -1940,7 +1959,5 @@ Public Function FileToClipboard(ByVal FileName As String)
     Call CloseClipboard
     FileToClipboard = "ok"
 End Function
-'测试专用
-Public Function test() As String
-    test = SendMessage(hWnd_, WM_LBUTTONDOWN, 100, 100)
-End Function
+
+
