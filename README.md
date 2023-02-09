@@ -147,12 +147,19 @@ http://blog.csdn.net/sysdzw/article/details/9083313
 '               增加函数：MouseRightUp 鼠标“右”键松开
 '               增加函数：DragTo 鼠标拖动某个点到另一个点
 '               增加函数：DragToEx 对上个函数的增强，可以执行一组坐标
+'               增加函数：ClipboardSetText 复制文本内容，兼容VBA                 2022/11/22
+'               修正函数：FileToClipboard 替换Clipboard对象，改用api实现兼容VBA
 '==============================================================================================
 ```
 
 
 ![](https://img-blog.csdn.net/20180423135213794)
+自动化操作计算器。
+
+以下为为录制鼠标。
 ![演示-录制鼠标拖动](https://user-images.githubusercontent.com/7876919/199826256-b27ab575-29dd-436d-9e07-ddcbe24812ea.gif)
+
+以下为播放上面录制的鼠标轨迹。
 ![演示-播放鼠标拖动](https://user-images.githubusercontent.com/7876919/199826294-cb19f354-eab1-48a0-aee6-a36f408bccb0.gif)
 
 
